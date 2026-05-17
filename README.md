@@ -1,104 +1,58 @@
-![Wallpaper Update](https://github.com/t0k3n0/year/actions/workflows/update_wallpaper.yml/badge.svg)
+![Wallpaper Update](https://github.com/Ben0x0a/year-dots-wp/actions/workflows/update_wallpaper.yml/badge.svg)
 
-# Life & Year Progress Wallpapers
+# Year Progress Wallpaper
 
-A "set and forget" automation that generates a dynamic wallpaper for your iPhone every morning. It runs on GitHub Actions (for free) and updates your lock screen via iOS Shortcuts.
+A small GitHub Actions automation that generates a dynamic iPhone wallpaper every day. The wallpaper shows one dot for each day of the current year, grouped as two weeks per row, with today's dot highlighted.
+
+Inspired by the original [t0k3n0/year](https://github.com/t0k3n0/year) repository.
 
 ## Features
-* **Life in Weeks:** A "Memento Mori" grid showing your past and future weeks.
-* **Year Progress:** A daily updated grid of the current year (365 days), highlighting today in orange.
-* **Zero Battery Drain:** All graphics are rendered on the server; your phone just downloads the final image.
+* **Year Progress:** A daily updated grid of the current year, highlighting today in orange.
+* **Calendar Alignment:** Rows start on Monday, with week numbers shown subtly on the left.
+* **Zero Battery Drain:** The image is rendered by GitHub Actions; your phone only downloads the final PNG.
 
 ## Setup Guide
 
 ### 1. Fork this Repository
-Click the **Fork** button (top right) to create your own copy of this project.
+Click the **Fork** button to create your own copy of this project.
 
-### 2. Set Your Birthday
-1.  Go to **Settings** > **Secrets and variables** > **Actions**.
-2.  Click **New repository secret**.
-3.  **Name:** `USER_BIRTHDAY`
-4.  **Secret:** `1995-01-01` (YYYY-MM-DD).
-    * *Note: If you skip this, it defaults to the year 2000.*
+### 2. Activate the Generator
+1. Go to the **Actions** tab.
+2. Click **Update Wallpapers** on the left.
+3. Click **Run workflow** to generate your first image.
 
-### 3. Activate the Generator
-1.  Go to the **Actions** tab.
-2.  Click **Update Wallpapers** on the left.
-3.  Click **Run workflow** to generate your first set of images.
+## Customizing for Your Phone
 
----
-
-## 📱 Customizing for Your Phone
-
-The default resolution is set for **iPhone 13/14/15 Pro** (`1170 x 2532`). If you have a Max, Plus, or Mini model, you should update the resolution so the grid is perfectly centered.
+The default resolution is set for **iPhone 17** (`1206 x 2622`). The raw GitHub image URL serves a static PNG, so query parameters like `?resolution=...` cannot make GitHub Actions render a different size on demand. If you use another phone, update the resolution before the workflow runs.
 
 ### How to Change Resolution
-1.  Open `generate_wallpaper.py` (Life) and `generate_year_wallpaper.py` (Year).
-2.  Click the **Pencil Icon** to edit.
-3.  Find this line near the top:
+1. Open `generate_year_wallpaper.py`.
+2. Find this line near the top:
     ```python
-    SCREEN_SIZE = (1170, 2532)
+    SCREEN_SIZE = (1206, 2622)
     ```
-4.  Change it to your device's resolution:
+3. Change it to your device's resolution:
+    * **iPhone 17:** `(1206, 2622)`
     * **iPhone 14/15/16 Pro Max:** `(1290, 2796)`
     * **iPhone 13/14 Pro Max:** `(1284, 2778)`
     * **iPhone 11 / XR:** `(828, 1792)`
     * **iPhone 12 / 13 Mini:** `(1080, 2340)`
 
-### Advanced Style Tweaks
-Inside `generate_year_wallpaper.py`, you can modify these variables to change the look:
+## iOS Shortcut Setup
 
-* **Make it Compact/Squared:**
-    Change `gap = 4` and replace `draw.ellipse` with `draw.rectangle` in the code.
-* **Change Colors:**
-    Update `BG_COLOR` (Background) or `ACTIVE_COLOR` (Today's Dot) using RGB values (e.g., `(255, 0, 0)` is Red).
+Create a shortcut with:
 
----
+1. **Get Contents of URL**
+2. Paste your raw image link:
+    ```text
+    https://raw.githubusercontent.com/<YOUR_USERNAME>/year-dots-wp/main/year_progress.png
+    ```
+    Replace `<YOUR_USERNAME>` with your GitHub username. If you rename the forked repository, replace `year-dots-wp` with your repository name. If your default branch is not `main`, replace `main` with your branch name.
+3. Open the URL in a browser once after the workflow has run. It should display the generated PNG directly.
+4. **Get Image from Input**
+5. **Set Wallpaper** with "Show Preview" turned off
+6. Set an Automation to run this daily
 
-## 🔗 iOS Shortcut Setup
+## Android Setup
 
-You need to create a simple Shortcut on your iPhone to fetch the image.
-
-### Option A: Single Wallpaper
-1.  Create a shortcut with **Get Contents of URL**.
-2.  Paste your **Raw Image Link**:
-    * `https://raw.githubusercontent.com/<YOUR_USERNAME>/year/main/year_progress.png`
-    * *(Or use `wallpaper.png` for the Life view)*
-3.  Add **Get Image from Input**.
-4.  Add **Set Wallpaper** (Turn off "Show Preview").
-5.  Set an Automation to run this daily at 4:00 AM.
-
-
----
-
-## 🤖 Android Setup
-
-Since Android doesn't have a built-in "Shortcuts" app, you will need a small app to fetch the wallpaper. Here are the three best options (all free).
-
-### Option 1: Remote Wallpaper (Best Open Source)
-A tiny, no-nonsense app that does exactly one thing: downloads an image from a URL and sets it as your wallpaper.
-* **Download:** [Get the APK here](https://github.com/cssnr/remote-wallpaper-android/releases)
-* **Setup:**
-  1. Open the app.
-  2. **Remote URL:** Paste your Raw GitHub Link (ending in `.png`).
-  3. **Interval:** Set to `24 Hours`.
-  4. Tap **Start**.
-
-### Option 2: Muzei (Best for Aesthetics)
-A polished "Live Wallpaper" app that creates a nice blur/dim effect behind your icons.
-* **Download:** [Play Store](https://play.google.com/store/apps/details?id=net.nurik.roman.muzei) or [F-Droid](https://f-droid.org/en/packages/net.nurik.roman.muzei/)
-* **Setup:**
-  1. Install **Muzei** + the **"With Others"** plugin (or any URL plugin).
-  2. Open Muzei and set it as your wallpaper.
-  3. Tap **Sources** -> **With Others**.
-  4. Paste your Raw GitHub Link.
-  5. Set Update Interval to `24h`.
-
-### Option 3: MacroDroid (For Power Users)
-If you want complex logic (e.g., randomizing between Life/Year views), use this automation tool.
-* **Download:** [Play Store](https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid)
-* **Setup:**
-  1. Create a macro with a **Daily Timer** trigger (e.g., 4:00 AM).
-  2. Add Action: **HTTP Request** (GET) -> Paste your URL -> Save to file `wallpaper.png`.
-  3. Add Action: **Set Wallpaper** -> Select that file.
-
+Use any wallpaper app that can fetch a remote image URL on a schedule, such as [Remote Wallpaper](https://github.com/cssnr/remote-wallpaper-android/releases), Muzei with a URL source, or MacroDroid.

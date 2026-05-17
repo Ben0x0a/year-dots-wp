@@ -1,14 +1,32 @@
 from PIL import Image, ImageDraw, ImageFont
-from datetime import date
+from datetime import date, timedelta
 import calendar
+import math
+import os
 
 # --- CONFIGURATION ---
-SCREEN_SIZE = (1206, 2622)     # Resolution of iPhone
+SCREEN_SIZE = (1206, 2622)     # iPhone 17 resolution
 BG_COLOR = (20, 20, 20)        # Dark Charcoal
 FILLED_COLOR = (80, 80, 80)    # Light Gray
 EMPTY_COLOR = (40, 40, 40)     # Dark Gray
 ACTIVE_COLOR = (255, 100, 50)  # Orange
 TEXT_COLOR = (200, 200, 200)   # Light Gray labels
+WEEK_LABEL_COLOR = (95, 95, 95)
+
+def scaled_size(percent_of_width):
+    return max(1, round(min(SCREEN_SIZE) * percent_of_width))
+
+def load_font(size, bold=False):
+    font_paths = [
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/System/Library/Fonts/HelveticaNeue.ttc",
+        "/System/Library/Fonts/SFNS.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ]
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            return ImageFont.truetype(font_path, size)
+    return ImageFont.load_default()
 
 def create_year_wallpaper():
     today = date.today()
@@ -16,6 +34,8 @@ def create_year_wallpaper():
     is_leap = calendar.isleap(year)
     total_days = 366 if is_leap else 365
     day_of_year = today.timetuple().tm_yday
+    first_day = date(year, 1, 1)
+    leading_empty_days = first_day.weekday()
     
     # Stats
     days_left = total_days - day_of_year
@@ -24,69 +44,84 @@ def create_year_wallpaper():
     img = Image.new('RGB', SCREEN_SIZE, color=BG_COLOR)
     draw = ImageDraw.Draw(img)
 
-    # --- GRID SETTINGS (RESIZED TO FIT) ---
+    # --- GRID SETTINGS ---
     cols = 14
-    rows = 27
+    rows = math.ceil((leading_empty_days + total_days) / cols)
     
-    # NEW SMALLER SIZES
-    # Previous settings were too big for the height of the screen
-    dot_radius = 10            
-    dot_size = dot_radius * 2  # 20px
-    gap = 12                   # 13px gap
+    dot_radius = scaled_size(0.014)
+    dot_size = dot_radius * 2
+    gap = scaled_size(0.013)
+    week_gap = scaled_size(0.03)
     
     # Calculate grid dimensions
-    grid_width = (cols * dot_size) + ((cols - 1) * gap)
+    grid_width = (cols * dot_size) + ((cols - 1) * gap) + week_gap
     grid_height = (rows * dot_size) + ((rows - 1) * gap)
     
     # Center Point
     start_x = (SCREEN_SIZE[0] - grid_width) // 2
-    start_y = (SCREEN_SIZE[1] - grid_height) // 2
+    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) - scaled_size(0.08)
 
     # --- FONTS ---
-    try:
-        font_main = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 40)
-        font_label = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
-    except IOError:
-        font_main = ImageFont.load_default()
-        font_label = ImageFont.load_default()
-
-    # --- LABELS ---
-    
-    # 1. Top Label: "DAYS"
-    # Drawn 80px above the grid
-    draw.text((SCREEN_SIZE[0]//2, start_y - 80), "DAYS", fill=TEXT_COLOR, font=font_label, anchor="ms")
-    
-    # 2. Side Label: "WEEKS"
-    # Drawn 60px to the left of the grid
-    draw.text((start_x - 60, start_y + grid_height//2), "WEEKS", fill=TEXT_COLOR, font=font_label, anchor="rm")
+    font_main = load_font(scaled_size(0.04))
+    font_label = load_font(scaled_size(0.029), bold=True)
 
     # --- DRAW GRID ---
-    current_day_index = 1
-    
     for row in range(rows):
+        week_number = (row * 2) + 1
+        draw.text(
+            (start_x - scaled_size(0.032), start_y + row * (dot_size + gap) + dot_radius),
+            str(week_number),
+            fill=WEEK_LABEL_COLOR,
+            font=font_label,
+            anchor="rm",
+        )
+
         for col in range(cols):
-            if current_day_index > total_days:
-                break
-                
+            cell_index = (row * cols) + col
+            day_offset = cell_index - leading_empty_days
+            current_date = first_day + timedelta(days=day_offset)
+
             x = start_x + col * (dot_size + gap)
+            if col >= 7:
+                x += week_gap
             y = start_y + row * (dot_size + gap)
             
             box = [x, y, x + dot_size, y + dot_size]
             
-            if current_day_index < day_of_year:
+            if current_date < first_day or current_date.year > year:
+                continue
+            elif current_date < today:
                 draw.ellipse(box, fill=FILLED_COLOR)
-            elif current_day_index == day_of_year:
-                # Active Day (Orange)
+            elif current_date == today:
                 draw.ellipse(box, fill=ACTIVE_COLOR)
             else:
                 draw.ellipse(box, fill=EMPTY_COLOR)
-            
-            current_day_index += 1
 
     # --- FOOTER STATS ---
     # Drawn 100px below the grid
-    stats_text = f"{days_left}d left  •  {percent_done}%"
-    draw.text((SCREEN_SIZE[0]//2, start_y + grid_height + 100), stats_text, fill=ACTIVE_COLOR, font=font_main, anchor="mm")
+    if days_left == 0:
+        left_text = "Last day of the year"
+    else:
+        day_label = "day" if days_left == 1 else "days"
+        left_text = f"{days_left} {day_label} left"
+    right_text = f" · {percent_done}% completed"
+    max_text_width = SCREEN_SIZE[0] * 0.9
+    for font_size in range(scaled_size(0.04), scaled_size(0.029), -2):
+        font_main = load_font(font_size)
+        left_box = draw.textbbox((0, 0), left_text, font=font_main)
+        right_box = draw.textbbox((0, 0), right_text, font=font_main)
+        left_width = left_box[2] - left_box[0]
+        right_width = right_box[2] - right_box[0]
+        if left_width + right_width <= max_text_width:
+            break
+    left_box = draw.textbbox((0, 0), left_text, font=font_main)
+    right_box = draw.textbbox((0, 0), right_text, font=font_main)
+    left_width = left_box[2] - left_box[0]
+    right_width = right_box[2] - right_box[0]
+    text_x = (SCREEN_SIZE[0] - left_width - right_width) // 2
+    text_y = start_y + grid_height + scaled_size(0.1)
+    draw.text((text_x, text_y), left_text, fill=ACTIVE_COLOR, font=font_main, anchor="la")
+    draw.text((text_x + left_width, text_y), right_text, fill=TEXT_COLOR, font=font_main, anchor="la")
 
     img.save("year_progress.png")
     print("Year progress wallpaper generated.")
