@@ -59,7 +59,7 @@ def create_year_wallpaper():
     
     # Center Point
     start_x = (SCREEN_SIZE[0] - grid_width) // 2
-    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.13)
+    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.205)
 
     # --- FONTS ---
     font_main = load_font(scaled_size(0.035))
