@@ -48,7 +48,7 @@ def create_year_wallpaper():
     cols = 14
     rows = math.ceil((leading_empty_days + total_days) / cols)
     
-    dot_radius = scaled_size(0.014)
+    dot_radius = scaled_size(0.012)
     dot_size = dot_radius * 2
     gap = scaled_size(0.013)
     week_gap = scaled_size(0.03)
@@ -59,11 +59,11 @@ def create_year_wallpaper():
     
     # Center Point
     start_x = (SCREEN_SIZE[0] - grid_width) // 2
-    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) - scaled_size(0.08)
+    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.055)
 
     # --- FONTS ---
-    font_main = load_font(scaled_size(0.04))
-    font_label = load_font(scaled_size(0.029), bold=True)
+    font_main = load_font(scaled_size(0.035))
+    font_label = load_font(scaled_size(0.025), bold=True)
 
     # --- DRAW GRID ---
     for row in range(rows):
@@ -106,7 +106,7 @@ def create_year_wallpaper():
         left_text = f"{days_left} {day_label} left"
     right_text = f" · {percent_done}% completed"
     max_text_width = SCREEN_SIZE[0] * 0.9
-    for font_size in range(scaled_size(0.04), scaled_size(0.029), -2):
+    for font_size in range(scaled_size(0.035), scaled_size(0.025), -2):
         font_main = load_font(font_size)
         left_box = draw.textbbox((0, 0), left_text, font=font_main)
         right_box = draw.textbbox((0, 0), right_text, font=font_main)
@@ -119,7 +119,7 @@ def create_year_wallpaper():
     left_width = left_box[2] - left_box[0]
     right_width = right_box[2] - right_box[0]
     text_x = (SCREEN_SIZE[0] - left_width - right_width) // 2
-    text_y = start_y + grid_height + scaled_size(0.1)
+    text_y = start_y + grid_height + scaled_size(0.045)
     draw.text((text_x, text_y), left_text, fill=ACTIVE_COLOR, font=font_main, anchor="la")
     draw.text((text_x + left_width, text_y), right_text, fill=TEXT_COLOR, font=font_main, anchor="la")
 
