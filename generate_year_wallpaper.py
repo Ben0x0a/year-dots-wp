@@ -12,6 +12,7 @@ EMPTY_COLOR = (40, 40, 40)     # Dark Gray
 ACTIVE_COLOR = (255, 100, 50)  # Orange
 TEXT_COLOR = (200, 200, 200)   # Light Gray labels
 WEEK_LABEL_COLOR = (95, 95, 95)
+STATUS_TEXT_POSITION = "top"   # "top" or "bottom"
 
 def scaled_size(percent_of_width):
     return max(1, round(min(SCREEN_SIZE) * percent_of_width))
@@ -27,6 +28,26 @@ def load_font(size, bold=False):
         if os.path.exists(font_path):
             return ImageFont.truetype(font_path, size)
     return ImageFont.load_default()
+
+def draw_status_text(draw, y, left_text, right_text):
+    max_text_width = SCREEN_SIZE[0] * 0.9
+    font_main = load_font(scaled_size(0.035))
+    for font_size in range(scaled_size(0.035), scaled_size(0.025), -2):
+        font_main = load_font(font_size)
+        left_box = draw.textbbox((0, 0), left_text, font=font_main)
+        right_box = draw.textbbox((0, 0), right_text, font=font_main)
+        left_width = left_box[2] - left_box[0]
+        right_width = right_box[2] - right_box[0]
+        if left_width + right_width <= max_text_width:
+            break
+
+    left_box = draw.textbbox((0, 0), left_text, font=font_main)
+    right_box = draw.textbbox((0, 0), right_text, font=font_main)
+    left_width = left_box[2] - left_box[0]
+    right_width = right_box[2] - right_box[0]
+    text_x = (SCREEN_SIZE[0] - left_width - right_width) // 2
+    draw.text((text_x, y), left_text, fill=ACTIVE_COLOR, font=font_main, anchor="la")
+    draw.text((text_x + left_width, y), right_text, fill=TEXT_COLOR, font=font_main, anchor="la")
 
 def create_year_wallpaper():
     today = date.today()
@@ -59,7 +80,14 @@ def create_year_wallpaper():
     
     # Center Point
     start_x = (SCREEN_SIZE[0] - grid_width) // 2
-    start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.155)
+    if STATUS_TEXT_POSITION == "top":
+        text_gap = scaled_size(0.075)
+        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.155)
+        status_text_y = start_y - text_gap
+    else:
+        text_gap = scaled_size(0.045)
+        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.155)
+        status_text_y = start_y + grid_height + text_gap
 
     # --- FONTS ---
     font_main = load_font(scaled_size(0.035))
@@ -97,31 +125,14 @@ def create_year_wallpaper():
             else:
                 draw.ellipse(box, fill=EMPTY_COLOR)
 
-    # --- FOOTER STATS ---
-    # Drawn 100px below the grid
+    # --- STATUS TEXT ---
     if days_left == 0:
         left_text = "Last day of the year"
     else:
         day_label = "day" if days_left == 1 else "days"
         left_text = f"{days_left} {day_label} left"
     right_text = f" · {percent_done}% completed"
-    max_text_width = SCREEN_SIZE[0] * 0.9
-    for font_size in range(scaled_size(0.035), scaled_size(0.025), -2):
-        font_main = load_font(font_size)
-        left_box = draw.textbbox((0, 0), left_text, font=font_main)
-        right_box = draw.textbbox((0, 0), right_text, font=font_main)
-        left_width = left_box[2] - left_box[0]
-        right_width = right_box[2] - right_box[0]
-        if left_width + right_width <= max_text_width:
-            break
-    left_box = draw.textbbox((0, 0), left_text, font=font_main)
-    right_box = draw.textbbox((0, 0), right_text, font=font_main)
-    left_width = left_box[2] - left_box[0]
-    right_width = right_box[2] - right_box[0]
-    text_x = (SCREEN_SIZE[0] - left_width - right_width) // 2
-    text_y = start_y + grid_height + scaled_size(0.045)
-    draw.text((text_x, text_y), left_text, fill=ACTIVE_COLOR, font=font_main, anchor="la")
-    draw.text((text_x + left_width, text_y), right_text, fill=TEXT_COLOR, font=font_main, anchor="la")
+    draw_status_text(draw, status_text_y, left_text, right_text)
 
     img.save("year_progress.png")
     print("Year progress wallpaper generated.")
