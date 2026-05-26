@@ -3,7 +3,7 @@ name: Update Wallpapers
 on:
   schedule:
     - cron: '0 0 * * *' # Runs at Midnight UTC
-  workflow_dispatch:      # Manual run button
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -11,24 +11,51 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: pip install Pillow
+      - name: Install dependencies
+        run: pip install Pillow
 
-    - name: Generate Year Wallpaper
-      run: python generate_year_wallpaper.py
+      - name: Generate Year Wallpaper
+        run: python generate_year_wallpaper.py
 
-    - name: Commit and Push
-      run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "79442510+Ben0x0a-git@users.noreply.github.com"
-        git add -A
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update wallpapers" && git push)
+      - name: Publish wallpaper to generated branch
+        run: |
+          set -euo pipefail
+
+          mkdir -p /tmp/year-dots-output
+          cp year_progress.png /tmp/year-dots-output/year_progress.png
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin generated >/dev/null 2>&1; then
+            git fetch origin generated
+            git worktree add -B generated /tmp/generated-branch origin/generated
+          else
+            git worktree add --detach /tmp/generated-branch
+            cd /tmp/generated-branch
+            git switch --orphan generated
+            git rm -rf . || true
+            cd "$GITHUB_WORKSPACE"
+          fi
+
+          cd /tmp/generated-branch
+          cp /tmp/year-dots-output/year_progress.png ./year_progress.png
+
+          git add year_progress.png
+          git diff --cached --quiet && exit 0
+
+          git commit -m "Update generated wallpaper"
+          git push origin generated

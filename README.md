@@ -45,7 +45,7 @@ Create a shortcut with:
 1. **Get Contents of URL**
 2. Paste your raw image link:
     ```text
-    https://raw.githubusercontent.com/<YOUR_USERNAME>/year-dots-wp/main/year_progress.png
+    https://raw.githubusercontent.com/<YOUR_USERNAME>/year-dots-wp/generated/year_progress.png
     ```
     Replace `<YOUR_USERNAME>` with your GitHub username. If you rename the forked repository, replace `year-dots-wp` with your repository name. If your default branch is not `main`, replace `main` with your branch name.
 3. Open the URL in a browser once after the workflow has run. It should display the generated PNG directly.

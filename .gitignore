@@ -1,1 +1,47 @@
-*.png
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# JetBrains IDEs: PyCharm, RustRover, IntelliJ, etc.
+.idea/
+
+# VS Code
+.vscode/
+
+# Zed
+.zed/
+
+# Vim
+*.swp
+*.swo
+*.swn
+Session.vim
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
