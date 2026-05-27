@@ -9,7 +9,7 @@ SCREEN_SIZE = (1206, 2622)     # iPhone 17 resolution
 BG_COLOR = (20, 20, 20)        # Dark Charcoal
 FILLED_COLOR = (80, 80, 80)    # Light Gray
 EMPTY_COLOR = (40, 40, 40)     # Dark Gray
-ACTIVE_COLOR = (255, 100, 50)  # Orange
+ACTIVE_COLOR = (36, 195, 0)    # Vaud green
 TEXT_COLOR = (200, 200, 200)   # Light Gray labels
 WEEK_LABEL_COLOR = (95, 95, 95)
 STATUS_TEXT_POSITION = "top"   # "top" or "bottom"
@@ -82,11 +82,11 @@ def create_year_wallpaper():
     start_x = (SCREEN_SIZE[0] - grid_width) // 2
     if STATUS_TEXT_POSITION == "top":
         text_gap = scaled_size(0.075)
-        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.155)
+        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.18)
         status_text_y = start_y - text_gap
     else:
         text_gap = scaled_size(0.045)
-        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.155)
+        start_y = ((SCREEN_SIZE[1] - grid_height) // 2) + scaled_size(0.18)
         status_text_y = start_y + grid_height + text_gap
 
     # --- FONTS ---
