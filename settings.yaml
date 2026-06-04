@@ -1,0 +1,59 @@
+output_filename: year_progress.png
+
+screen:
+  width: 1206
+  height: 2622
+
+colors:
+  background: [20, 20, 20]
+  past: [80, 80, 80]
+  future: [40, 40, 40]
+  today: [36, 195, 0]
+  text: [200, 200, 200]
+  week_label: [95, 95, 95]
+  deadline_notice: [95, 95, 95]
+
+layout:
+  # Center of the dot grid. Week label space is reserved symmetrically around it.
+  center_position: [603, 1540]
+  columns: 14
+  dot_radius_percent: 0.012
+  horizontal_spacing_percent: 0.013
+  vertical_spacing_percent: 0.013
+  week_gap_percent: 0.03
+  week_label_offset_percent: 0.032
+  week_label_position: left
+  status_text_position: top
+  status_text_gap_percent: 0.075
+  status_text_font_percent: 0.035
+  status_text_min_font_percent: 0.025
+  status_text_max_width_percent: 0.9
+  week_label_font_percent: 0.025
+  next_year_deadline_notice:
+    enabled: true
+    days_before_year_end: 50
+    deadline_window_days: 50
+    gap_percent: 0.02
+    font_percent: 0.024
+    min_font_percent: 0.018
+    max_width_percent: 0.9
+
+# Future deadline dates in the current year are colored with no text label.
+# Past dates are ignored. Recurring deadlines use date as the first occurrence.
+deadlines:
+  # - date: 2026-09-30
+  #   color: "#f5b642"
+  # - date: 2026-12-15
+  #   color: [210, 70, 90]
+  # - date: 2026-01-02
+  #   recurrence: yearly
+  #   color: "#f5b642"
+  # - date: 2026-03-15
+  #   recurrence: semestre
+  #   color: "#5eb5ff"
+  # - date: 2026-04-10
+  #   recurrence: trimestre
+  #   color: "#d776ff"
+  # - date: 2026-05-01
+  #   recurrence: monthly
+  #   color: "#ff6f61"
